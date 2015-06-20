@@ -1,3 +1,4 @@
+#include <fstream>
 #include <pluginlib/class_list_macros.h>
 #include <waypoint_global_planner.h>
 
@@ -8,37 +9,49 @@ using namespace std;
 
 namespace global_planner {
 
-WaypointGlobalPlanner::WaypointGlobalPlanner() { }
-
-WaypointGlobalPlanner::WaypointGlobalPlanner(std::string name, costmap_2d::Costmap2DROS* costmap_ros)
-{
-	initialize(name, costmap_ros);
+WaypointGlobalPlanner::WaypointGlobalPlanner() 
+ : waypoint_file_name("waypoint_list.txt") { 
 }
 
-void WaypointGlobalPlanner::makePlan(
-	const geometry_msgs::PoseStamped& start,
-	const geometry_mgss::PostStamped& goal,
-	std::vector<geometry_msgs::PostStamped>& plan)
+WaypointGlobalPlanner::WaypointGlobalPlanner(std::string name, costmap_2d::Costmap2DROS* costmap_ros)
+ : waypoint_file_name("waypoint_list.txt")
 {
-	// simple planner
-	plan.push_back(start);
-	for (int i = 0; i < 20; i++)
+	initialize(name, costmap_ros);
+
+	ros::NodeHandle private_nh("~/waypoint_global_planner");
+	private_nh.param("waypoint_list", waypoint_file_name, waypoint_file_name); 
+}
+
+bool WaypointGlobalPlanner::makePlan(
+	const geometry_msgs::PoseStamped& start,
+	const geometry_msgs::PoseStamped& goal,
+	std::vector<geometry_msgs::PoseStamped>& plan)
+{
+	// ROS_INFO("Making global plan based on file='%s'", waypoint_file_name);
+
+	// deserialize waypoints from binary file
+	std::vector<geometry_msgs::PoseStamped> waypoints;
+
+	// TODO: return false if could not open file
+	std::ifstream ifs(waypoint_file_name.c_str(), std::ios::in|std::ios::binary);
+	ifs.seekg (0, std::ios::end);
+	std::streampos end = ifs.tellg();
+	ifs.seekg(0, std::ios::beg);
+	std::streampos begin = ifs.tellg();
+
+	uint32_t file_size = end-begin;
+	boost::shared_array<uint8_t> ibuffer(new uint8_t[file_size]);
+	ifs.read((char*) ibuffer.get(), file_size);
+	ros::serialization::IStream istream(ibuffer.get(), file_size);
+	ros::serialization::deserialize(istream, waypoints);
+	ifs.close();
+
+	// populate plan
+	for (int i = 0; i < waypoints.size(); i++)
 	{
-		geometry_msgs::PoseStamped new_goal = goal;
-		tf::Quaternion goal_quat = tf::createQuaternionFromYaw(1.54);
-
-		new_goal.pose.position.x = -2.5+(0.05*i);
-		new_goal.pose.position.y = -3.5+(0.05*i);
-		
-		new_goal.pose.orientation.x = goal_quat.x();
-		new_goal.pose.orientation.y = qoal_quat.y();
-		new_goal.pose.orientation.z = goal_quat.z();
-		new_goal.pose.orientation.w = goal.quat.w();
-
-		plan.push_back(new_goal);
+		plan.push_back(waypoints[i]);
 	}
 
-	plan.push_back(goal);
 	return true;
 }
 

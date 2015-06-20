@@ -4,10 +4,21 @@ project(waypoint_global_planner)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED
+  COMPONENTS
+    costmap_2d
+    dynamic_reconfigure
+    geometry_msgs
+    nav_core
+    nav_msgs
+    pluginlib
+    roscpp
+    tf
+)
 
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+generate_dynamic_reconfigure_options(
+  cfg/WaypointGlobalPlanner.cfg
+)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -113,6 +124,9 @@ add_library(
 #############
 ## Install ##
 #############
+
+install(FILES waypoint_global_planner.xml
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
