@@ -10,7 +10,10 @@ using namespace std;
 namespace global_planner {
 
 WaypointGlobalPlanner::WaypointGlobalPlanner() 
- : waypoint_file_name("waypoint_list.txt") { 
+ : waypoint_file_name("waypoint_list.txt")
+{ 
+	ros::NodeHandle private_nh("~/WaypointGlobalPlanner");
+	private_nh.param("waypoint_list", waypoint_file_name, waypoint_file_name); 
 }
 
 WaypointGlobalPlanner::WaypointGlobalPlanner(std::string name, costmap_2d::Costmap2DROS* costmap_ros)
@@ -18,8 +21,12 @@ WaypointGlobalPlanner::WaypointGlobalPlanner(std::string name, costmap_2d::Costm
 {
 	initialize(name, costmap_ros);
 
-	ros::NodeHandle private_nh("~/waypoint_global_planner");
+	ros::NodeHandle private_nh("~/" + name);
 	private_nh.param("waypoint_list", waypoint_file_name, waypoint_file_name); 
+}
+
+void WaypointGlobalPlanner::initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros)
+{
 }
 
 bool WaypointGlobalPlanner::makePlan(
@@ -27,13 +34,20 @@ bool WaypointGlobalPlanner::makePlan(
 	const geometry_msgs::PoseStamped& goal,
 	std::vector<geometry_msgs::PoseStamped>& plan)
 {
-	// ROS_INFO("Making global plan based on file='%s'", waypoint_file_name);
+	ROS_INFO("Making global plan based on file='%s'", waypoint_file_name.c_str());
 
 	// deserialize waypoints from binary file
 	std::vector<geometry_msgs::PoseStamped> waypoints;
 
 	// TODO: return false if could not open file
 	std::ifstream ifs(waypoint_file_name.c_str(), std::ios::in|std::ios::binary);
+
+	if (!ifs.is_open())
+	{
+		ROS_ERROR("Failed to open waypoint list '%s'", waypoint_file_name.c_str());
+		return false;
+	}
+
 	ifs.seekg (0, std::ios::end);
 	std::streampos end = ifs.tellg();
 	ifs.seekg(0, std::ios::beg);

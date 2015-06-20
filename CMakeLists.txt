@@ -16,11 +16,6 @@ find_package(catkin REQUIRED
     tf
 )
 
-generate_dynamic_reconfigure_options(
-  cfg/WaypointGlobalPlanner.cfg
-)
-
-
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
@@ -110,7 +105,7 @@ add_library(
 )
 
 ## Declare a cpp executable
-# add_executable(waypoint_global_planner_node src/waypoint_global_planner_node.cpp)
+add_executable(waypoint_global_planner_test src/waypoint_global_planner_test.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -118,6 +113,11 @@ add_library(
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(waypoint_global_planner
+  ${catkin_LIBRARIES}
+)
+
+target_link_libraries(waypoint_global_planner_test
+  waypoint_global_planner
   ${catkin_LIBRARIES}
 )
 

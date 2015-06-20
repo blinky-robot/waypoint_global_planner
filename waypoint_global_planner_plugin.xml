@@ -1,4 +1,4 @@
-<library path="lib/libwaypoint_global_planner_lib">
+<library path="lib/libwaypoint_global_planner">
   <class name="waypoint_global_planner/WaypointGlobalPlanner" type="global_planner::WaypointGlobalPlanner" base_class_type="nav_core::BaseGlobalPlanner">
     <description>This global planner publishes paths from waypoints</description>
   </class>
