@@ -125,9 +125,6 @@ target_link_libraries(waypoint_global_planner_test
 ## Install ##
 #############
 
-install(FILES waypoint_global_planner.xml
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 
