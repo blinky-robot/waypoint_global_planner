@@ -27,6 +27,8 @@ class WaypointGlobalPlanner : public nav_core::BaseGlobalPlanner{
 		std::vector<geometry_msgs::PoseStamped>& plan);
 
 	std::string waypoint_file_name;
+
+	ros::Publisher path_pub;
 };
 };
 #endif

@@ -2,6 +2,8 @@
 #include <pluginlib/class_list_macros.h>
 #include <waypoint_global_planner.h>
 
+#include <nav_msgs/Path.h>
+
 // register as a BaseGlobalPlanner plugin
 PLUGINLIB_EXPORT_CLASS(global_planner::WaypointGlobalPlanner, nav_core::BaseGlobalPlanner)
 
@@ -14,6 +16,7 @@ WaypointGlobalPlanner::WaypointGlobalPlanner()
 { 
 	ros::NodeHandle private_nh("~/WaypointGlobalPlanner");
 	private_nh.param("waypoint_list", waypoint_file_name, waypoint_file_name); 
+	path_pub = private_nh.advertise<nav_msgs::Path>("global_plan", 1);
 }
 
 WaypointGlobalPlanner::WaypointGlobalPlanner(std::string name, costmap_2d::Costmap2DROS* costmap_ros)
@@ -23,6 +26,8 @@ WaypointGlobalPlanner::WaypointGlobalPlanner(std::string name, costmap_2d::Costm
 
 	ros::NodeHandle private_nh("~/" + name);
 	private_nh.param("waypoint_list", waypoint_file_name, waypoint_file_name); 
+
+	path_pub = private_nh.advertise<nav_msgs::Path>("global_plan", 1);
 }
 
 void WaypointGlobalPlanner::initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros)
@@ -64,6 +69,17 @@ bool WaypointGlobalPlanner::makePlan(
 	for (int i = 0; i < waypoints.size(); i++)
 	{
 		plan.push_back(waypoints[i]);
+	}
+
+	if (path_pub)
+	{
+		nav_msgs::Path thepath;
+		thepath.poses = waypoints;
+
+		thepath.header.frame_id = "map";
+		thepath.header.stamp = ros::Time::now();
+
+		path_pub.publish(thepath);
 	}
 
 	return true;
